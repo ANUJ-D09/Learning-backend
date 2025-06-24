@@ -5,7 +5,7 @@ const { UserModel, TodoModel } = require("/Users/anujdamani/Desktop/100xdevs/Dat
 const app = express();
 const JWT_SECRET = "shreehari";
 const mongoose = require("mongoose");
-
+mongoose.connect("mongodb+srv://ekvaishnav82:p1XFSvcJqZII6sC6@cluster0.hdmgxmd.mongodb.net/todo-anuj-todo");
 
 app.use(express.json());
 
@@ -30,7 +30,8 @@ app.post('/signin', async function(req, res) {
         const user = await UserModel.findOne({ email, password });
 
         if (user) {
-            const token = jwt.sign({ email: user.email }, JWT_SECRET);
+            const token = jwt.sign({ userId: user._id }, JWT_SECRET);
+
             res.json({ message: "You are signed in. Enjoy!", token });
         } else {
             res.status(403).json({ message: "Incorrect credentials" });
@@ -42,7 +43,7 @@ app.post('/signin', async function(req, res) {
 });
 
 
-app.post('/todo', async function(req, res) {
+app.post('/todo', auth, async function(req, res) {
     const { title, done } = req.body;
     try {
         await TodoModel.create({ title, done });
@@ -72,12 +73,42 @@ app.get('/todo', async function(req, res) {
     }
 });
 
-app.post('/updated', function(req, res) {
-    res.json({ message: "TODO list retrieval not implemented yet" });
-});
-app.post('/delettodo', function(req, res) {
+app.delete('/todo/:id', auth, async function(req, res) {
+    const todoId = req.params.id;
 
+    try {
+        const deleted = await TodoModel.findOneAndDelete({ _id: todoId, userId: req.userId });
+
+        if (!deleted) {
+            return res.status(404).json({ message: "Todo not found or unauthorized" });
+        }
+
+        res.json({ message: "Todo deleted successfully" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to delete todo" });
+    }
 });
+
+
+
+function auth(req, res, next) {
+    const token = req.headers.token;
+
+    if (!token) {
+        return res.status(401).json({ message: "Token missing" });
+    }
+
+    try {
+        const decodedData = jwt.verify(token, JWT_SECRET);
+        req.userId = decodedData.userId;
+        next(); // important fix
+    } catch (err) {
+        console.error("Invalid token", err);
+        res.status(401).json({ message: "Invalid token" });
+    }
+}
+
 
 app.listen(3000, () => {
     console.log("Server running on http://localhost:3000");
