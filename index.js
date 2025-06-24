@@ -5,7 +5,6 @@ const { UserModel, TodoModel } = require("/Users/anujdamani/Desktop/100xdevs/Dat
 const app = express();
 const JWT_SECRET = "shreehari";
 const mongoose = require("mongoose");
-mongoose.connect("mongodb+srv://ekvaishnav82:p1XFSvcJqZII6sC6@cluster0.hdmgxmd.mongodb.net/todo-anuj-todo");
 
 app.use(express.json());
 
