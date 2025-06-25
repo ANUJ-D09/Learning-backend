@@ -5,15 +5,17 @@ const { UserModel, TodoModel } = require("/Users/anujdamani/Desktop/100xdevs/Dat
 const app = express();
 const JWT_SECRET = "shreehari";
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 app.use(express.json());
 
 
 app.post('/signup', async function(req, res) {
     const { name, password, email } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 5);
 
     try {
-        await UserModel.create({ name, password, email });
+        await UserModel.create({ name, hashedPassword, email });
         res.json({ message: "User created successfully" });
     } catch (err) {
         console.error(err);

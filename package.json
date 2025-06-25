@@ -6,6 +6,7 @@
   "author": "anujda09 <anujdamani9@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.0"
