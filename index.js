@@ -1,7 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const { UserModel, TodoModel } = require("/Users/anujdamani/Desktop/100xdevs/Database/db.js");
-
+const { z } = require("zod");
 const app = express();
 const JWT_SECRET = "shreehari";
 const mongoose = require("mongoose");
@@ -11,12 +11,25 @@ app.use(express.json());
 
 
 app.post('/signup', async function(req, res) {
+
+    const requirebody = z.object({
+        email: z.string().email(),
+        name: z.string(),
+        password: z.string()
+
+    })
+    const parsedData = requirebody.safeparse(req.body);
+    if (!parsedData.success) {
+        res.json({ message: "Inorrect Format" })
+        return
+    }
+
     const { name, password, email } = req.body;
     const hashedPassword = await bcrypt.hash(password, 5);
 
     try {
         await UserModel.create({ name, hashedPassword, email });
-        res.json({ message: "User created successfully" });
+        res.json({ message: "User created successfully", hashedPassword });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Signup failed" });
